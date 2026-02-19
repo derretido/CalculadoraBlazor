@@ -1,0 +1,94 @@
+@page "/calculadora"
+@rendermode InteractiveServer
+
+
+<h3>Calculadora</h3>
+
+<div class="calc-container">
+    <div class="display">@display</div>
+
+    <div class="buttons">
+        <button @onclick='() => AddDigit("7")'>7</button>
+        <button @onclick='() => AddDigit("8")'>8</button>
+        <button @onclick='() => AddDigit("9")'>9</button>
+        <button @onclick='() => SetOperator("/")'>÷</button>
+        <button @onclick='() => AddDigit("4")'>4</button>
+        <button @onclick='() => AddDigit("5")'>5</button>
+        <button @onclick='() => AddDigit("6")'>6</button>
+        <button @onclick='() => SetOperator("*")'>×</button>
+        <button @onclick='() => AddDigit("1")'>1</button>
+        <button @onclick='() => AddDigit("2")'>2</button>
+        <button @onclick='() => AddDigit("3")'>3</button>
+        <button @onclick='() => SetOperator("-")'>−</button>
+
+        <button @onclick='() => AddDigit("0")'>0</button>
+        <button @onclick='Clear'>C</button>
+        <button @onclick='Calculate'>=</button>
+        <button @onclick='() => SetOperator("+")'>+</button>
+    </div>
+</div>
+
+@code {
+    private string display = "0";
+    private double valor1 = 0;
+    private double valor2 = 0;
+    private string operador = "";
+    private bool limpandoParaSegundoValor = false;
+
+    private void AddDigit(string digit)
+    {
+        // Se acabamos de clicar em um operador, limpamos o visor para o novo número
+        if (display == "0" || limpandoParaSegundoValor)
+        {
+            display = digit;
+            limpandoParaSegundoValor = false;
+        }
+        else
+        {
+            display += digit;
+        }
+
+        // Atualizamos o valor numérico correspondente
+        if (string.IsNullOrEmpty(operador))
+            valor1 = double.Parse(display);
+        else
+            valor2 = double.Parse(display);
+    }
+
+    private void SetOperator(string op)
+    {
+        if (!string.IsNullOrEmpty(operador))
+        {
+            Calculate(); // Permite fazer 5 + 5 + 5 sem clicar em '='
+        }
+        operador = op;
+        limpandoParaSegundoValor = true;
+    }
+
+    private void Calculate()
+    {
+        double resultado = 0;
+        switch (operador)
+        {
+            case "+": resultado = valor1 + valor2; break;
+            case "-": resultado = valor1 - valor2; break;
+            case "*": resultado = valor1 * valor2; break;
+            case "/": resultado = valor2 != 0 ? valor1 / valor2 : 0; break;
+            default: return; // Se não houver operador, não faz nada
+        }
+
+        display = resultado.ToString();
+        valor1 = resultado; // O resultado vira o primeiro valor para a próxima conta
+        operador = "";
+        limpandoParaSegundoValor = true;
+    }
+
+    private void Clear()
+    {
+        display = "0";
+        valor1 = 0;
+        valor2 = 0;
+        operador = "";
+        limpandoParaSegundoValor = false;
+    }
+}
